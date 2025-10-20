@@ -67,5 +67,69 @@ async def async_setup(hass: HomeAssistant, config: dict):
     # Change these to your actual entities
     weather_entity = "weather.home"
     light_entity = "light.hue_test_light"
+# HEX → RGB helper
+    def _hex_to_rgb(hex_color: str):
+        hex_color = hex_color.lstrip("#")
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
+    # 💡 Main logic — updates lighting based on weather + time
+    async def update_lighting(reason: str = "Manual Trigger"):
+        weather = hass.states.get(weather_entity)
+        if not weather:
+            _LOGGER.error(f"Weather entity '{weather_entity}' not found.")
+            return
 
+        condition = weather.state.lower().strip()
+        time_slot = get_time_slot()
+        mode_name, color_hex, brightness, desc = get_adaptive_scene(condition, time_slot)
+
+        _LOGGER.info(f"[{reason}] 🌤 {condition} | {time_slot} | Mode: {mode_name} | {color_hex}")
+
+        await hass.services.async_call(
+            "light",
+            "turn_on",
+            {
+                "entity_id": light_entity,
+                "brightness": brightness,
+                "rgb_color": _hex_to_rgb(color_hex),
+                "transition": 8,
+            },
+        )
+
+        hass.components.persistent_notification.create(
+            f"<b>{reason}</b><br>"
+            f"<b>Condition:</b> {condition.capitalize()}<br>"
+            f"<b>Time:</b> {time_slot.capitalize()}<br>"
+            f"<b>Mode:</b> {mode_name}<br>"
+            f"<b>Color:</b> {color_hex}<br>"
+            f"<b>Description:</b> {desc}",
+            title="💡 Hue Weather AI Adaptive Update",
+        )
+
+    # 🧠 Trigger updates when weather changes
+    @callback
+    async def weather_changed(entity, old_state, new_state):
+        if not new_state or not old_state:
+            return
+        if new_state.state != old_state.state:
+            _LOGGER.info(f"🌦 Weather changed from '{old_state.state}' → '{new_state.state}'")
+            await update_lighting(reason="Weather Change Detected")
+
+    async_track_state_change(hass, weather_entity, weather_changed)
+
+    # 🕒 Still runs every 30 mins as backup (in case API misses an event)
+    async_track_time_interval(
+        hass, lambda _: hass.async_create_task(update_lighting(reason="Scheduled Refresh")), timedelta(minutes=30)
+    )
+
+    # Manual trigger (optional)
+    async def manual_apply(call: ServiceCall):
+        await update_lighting(reason="Manual Service Call")
+
+    hass.services.async_register(DOMAIN, "apply_weather_mode", manual_apply)
+
+    # Run once at startup
+    hass.async_create_task(update_lighting(reason="Startup Initialization"))
+
+    _LOGGER.info("✅ Hue Weather Adaptive AI (Real-Time) is active.")
+    return True
