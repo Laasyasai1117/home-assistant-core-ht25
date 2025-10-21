@@ -1,0 +1,19 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Philips Hue Weather Adaptive Integration
+hue_weather_adaptive:
+
+# Simulated Weather (Template)
+weather:
+  - platform: template
+    name: "Home Forecast"
+    condition_template: "{{ states('input_text.weather_condition') }}"
+    temperature_template: "{{ 20 }}"
+    humidity_template: "{{ 60 }}"
+    pressure_template: "{{ 1010 }}"
+    wind_speed_template: "{{ 5 }}"
