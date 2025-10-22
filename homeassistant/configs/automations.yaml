@@ -1,0 +1,23 @@
+- id: '1760339321382'
+  alias: "Weather Adaptive Lighting – Hybrid Pro 2.0"
+  description: "Smooth 4-phase adaptive lighting reacting to time & weather"
+  trigger:
+    - platform: state
+      entity_id: weather.forecast_home
+    - platform: time_pattern
+      minutes: "/45"
+    - platform: time
+      at: "06:00:00"  # Morning start
+    - platform: time
+      at: "10:00:00"  # Day start
+    - platform: time
+      at: "17:00:00"  # Evening start
+    - platform: time
+      at: "20:00:00"  # Night start
+  condition: []
+  action:
+    - service: hue_weather_adaptive.apply_weather_mode
+      data:
+        entity_id: light.hue_test_light
+        weather_entity: weather.forecast_home
+  mode: single
