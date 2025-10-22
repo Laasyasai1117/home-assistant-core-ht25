@@ -21,3 +21,24 @@
         entity_id: light.hue_test_light
         weather_entity: weather.forecast_home
   mode: single
+
+# Add Soft warm light 
+- id: '1760339321383'
+  alias: "Evening Relax Lighting – Hybrid Pro 2.1"
+  description: "Soft warm light after sunset, adaptive to weather"
+  trigger:
+    - platform: sun
+      event: sunset
+    - platform: state
+      entity_id: weather.forecast_home
+  condition:
+    - condition: state
+      entity_id: light.hue_test_light
+      state: "off"
+  action:
+    - service: light.turn_on
+      data:
+        entity_id: light.hue_test_light
+        brightness_pct: 60
+        color_temp: 380
+  mode: single
