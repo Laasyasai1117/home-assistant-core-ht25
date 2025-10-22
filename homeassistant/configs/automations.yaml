@@ -42,3 +42,4 @@
         brightness_pct: 60
         color_temp: 380
   mode: single
+      at: "06:00:00"  # Morning start
