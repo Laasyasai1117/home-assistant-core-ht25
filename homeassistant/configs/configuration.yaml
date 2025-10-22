@@ -17,3 +17,27 @@ weather:
     humidity_template: "{{ 60 }}"
     pressure_template: "{{ 1010 }}"
     wind_speed_template: "{{ 5 }}"
+
+# Input text entities for simulation and UI
+input_text:
+  weather_condition:
+    name: Weather Condition
+    initial: sunny
+  hue_adaptive_mode:
+    name: Hue Adaptive Mode
+    initial: "Soft Neutral Light 🌗"
+
+# Simulated Hue Light entity
+light:
+  - platform: template
+    lights:
+      hue_test_light:
+        friendly_name: "Hue Test Light"
+        turn_on:
+        turn_off:
+        set_level:
+
+# Automations, scripts, and scenes
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
