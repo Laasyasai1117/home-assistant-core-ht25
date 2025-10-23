@@ -1,0 +1,9 @@
+﻿{
+  "domain": "hue_weather_adaptive",
+  "name": "Hue Weather Adaptive Lighting",
+  "version": "1.0.0",
+  "documentation": "https://github.com/home-assistant/core",
+  "dependencies": [],
+  "codeowners": ["@Laasyasai1117"],
+  "requirements": []
+}
